@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nexus Remote — Redirecting…</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #080B14; color: #E8EAF6;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex; align-items: center; justify-content: center;
+      height: 100vh; flex-direction: column; gap: 16px;
+    }
+    .logo {
+      font-size: 22px; font-weight: 800;
+      background: linear-gradient(135deg, #4F9CF9, #00D4AA);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .msg { font-size: 13px; color: #4A5568; }
+    .url { font-size: 11px; color: #4F9CF9; margin-top: 4px; }
+    .offline { font-size: 12px; color: #FF4D6A; display: none; }
+  </style>
+</head>
+<body>
+  <div class="logo">◎ NEXUS REMOTE</div>
+  <div class="msg">Connecting to your server…</div>
+  <div class="url" id="urlDisplay">loading target…</div>
+  <div class="offline" id="offlineMsg">
+    ⚠ Could not reach server. Make sure server.py + ngrok are running,<br>
+    then run <code>update_github.py</code> to refresh this redirect.
+  </div>
+
+  <script>
+    // The updater script writes the current ngrok URL into this file
+    fetch('nexus_url.txt?_=' + Date.now())
+      .then(r => r.text())
+      .then(url => {
+        url = url.trim();
+        document.getElementById('urlDisplay').textContent = url;
+        // Quick reachability check, then redirect
+        fetch(url + '/api/ping', { mode: 'no-cors' })
+          .catch(() => {})
+          .finally(() => { window.location.replace(url); });
+      })
+      .catch(() => {
+        document.getElementById('offlineMsg').style.display = 'block';
+        document.getElementById('urlDisplay').textContent = 'nexus_url.txt not found';
+      });
+  </script>
+</body>
+</html>
